@@ -13,14 +13,8 @@ struct arraylist {
  */
 inline static void _ensure_capacity(struct arraylist *al) {
 	if (al->capacity <= al->length) {
-		void *old_array = al->array;
-		size_t old_capacity = al->capacity;
-
 		al->capacity *= 2;	// Doubles size of array
-		al->array = malloc(al->capacity * al->value_size);
-
-		memcpy(al->array, old_array, old_capacity * al->value_size);
-		free(old_array);
+		al->array = realloc(al->array, al->capacity * al->value_size);
 	}
 }
 
