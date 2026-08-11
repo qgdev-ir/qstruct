@@ -16,7 +16,7 @@ struct hashmap {
 };
 
 struct entry {
-	struct hashmap *map;
+	qstruct_hashmap_t map;
 	char *value;
 	size_t value_size;
 	size_t key_size;
@@ -24,7 +24,7 @@ struct entry {
 };
 
 struct iterator {
-	struct hashmap *map;
+	qstruct_hashmap_t map;
 	size_t size;
 	int index;
 	struct entry *entries[];
@@ -43,7 +43,7 @@ static int8_t _hm_entry_comparator(char *x, char *y) {
  * Get bucket for given entry
  * Creates the bucket if doesnt exists
  */
-static inline qstruct_result_t _hm_get_bucket(struct hashmap *hm, qstruct_rbtree_t *b, struct entry *e) {
+static inline qstruct_result_t _hm_get_bucket(qstruct_hashmap_t hm, qstruct_rbtree_t *b, struct entry *e) {
 	int bucket_index = HM_BUCKET_INDEX(e->key, e->key_size, hm);
 	qstruct_rbtree_t bucket = hm->buckets[bucket_index];
 	if (bucket == NULL) {
@@ -58,7 +58,7 @@ static inline qstruct_result_t _hm_get_bucket(struct hashmap *hm, qstruct_rbtree
  * Add entry to the buckets
  * In this function load factor is not checked
  */
-static inline qstruct_result_t _hm_put(struct hashmap *hm, struct entry *e) {
+static inline qstruct_result_t _hm_put(qstruct_hashmap_t hm, struct entry *e) {
 	qstruct_rbtree_t b;
 	qstruct_run(_hm_get_bucket(hm, &b, e));
 	qstruct_run(qstruct_rbtree_add(b, e, sizeof(struct entry) + e->key_size));
@@ -69,7 +69,7 @@ static inline qstruct_result_t _hm_put(struct hashmap *hm, struct entry *e) {
  * Make sure load factor is below max load factor
  * If load factor is above max load it will doubles the buckets size
  */
-static inline qstruct_result_t _hm_ensure_loadfactor(struct hashmap *hm) {
+static inline qstruct_result_t _hm_ensure_loadfactor(qstruct_hashmap_t hm) {
 	if (hm->length / hm->capacity >= hm->max_loadfactor) {
 		qstruct_rbtree_t *obuckets = hm->buckets;
 		size_t ocapacity = hm->capacity;
@@ -103,7 +103,7 @@ static inline qstruct_result_t _hm_ensure_loadfactor(struct hashmap *hm) {
 /*
  * Finds and returns entry of the given key
  */
-static inline qstruct_result_t _hm_get(struct hashmap *hm, struct entry **e, char *key, size_t key_size) {
+static inline qstruct_result_t _hm_get(qstruct_hashmap_t hm, struct entry **e, char *key, size_t key_size) {
 	qstruct_rbtree_t bucket = hm->buckets[HM_BUCKET_INDEX(key, key_size, hm)];
 	if (bucket == NULL) return QSTRUCT_RESULT_KEY_NOT_FOUND;
 
@@ -127,7 +127,7 @@ qstruct_result_t qstruct_hashmap_create(qstruct_hashmap_t *hashmap, qstruct_rbtr
 	if (capacity == 0) capacity = QSTRUCT_HASHMAP_DEFAULT_CAPACITY;
 	if (max_loadfactor == 0) max_loadfactor = QSTRUCT_HASHMAP_DEFAULT_MAX_LOADFACTOR;
 
-	struct hashmap *hm = malloc(sizeof(struct hashmap));
+	qstruct_hashmap_t hm = malloc(sizeof(struct hashmap));
 	hm->length = 0;
 	hm->capacity = capacity;
 	hm->comparator = comparator;
@@ -142,8 +142,7 @@ qstruct_result_t qstruct_hashmap_create(qstruct_hashmap_t *hashmap, qstruct_rbtr
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_hashmap_destroy(qstruct_hashmap_t hashmap) {
-	struct hashmap *hm = hashmap;
+qstruct_result_t qstruct_hashmap_destroy(qstruct_hashmap_t hm) {
 	qstruct_rbtree_t *buckets = hm->buckets;
 
 	for (int i = 0; i < hm->capacity; i++) {
@@ -166,9 +165,8 @@ qstruct_result_t qstruct_hashmap_destroy(qstruct_hashmap_t hashmap) {
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_hashmap_add(qstruct_hashmap_t hashmap, void *key, size_t key_size, void *value, size_t value_size) {
-	struct hashmap *hm = hashmap;
-	qstruct_run(_hm_ensure_loadfactor(hashmap));
+qstruct_result_t qstruct_hashmap_add(qstruct_hashmap_t hm, void *key, size_t key_size, void *value, size_t value_size) {
+	qstruct_run(_hm_ensure_loadfactor(hm));
 
 	struct entry *e = malloc(sizeof(struct entry) + key_size);
 	char *e_val = malloc(value_size);
@@ -187,19 +185,17 @@ qstruct_result_t qstruct_hashmap_add(qstruct_hashmap_t hashmap, void *key, size_
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_hashmap_get(qstruct_hashmap_t hashmap, void *key, size_t key_size, void *value, size_t *value_size) {
-	struct hashmap *hm =  hashmap;
+qstruct_result_t qstruct_hashmap_get(qstruct_hashmap_t hm, void *key, size_t key_size, void *value, size_t *value_size) {
 	void *src;
 	size_t rvalue_size;
-	qstruct_run(qstruct_hashmap_getp(hashmap, key, key_size, &src, &rvalue_size));
+	qstruct_run(qstruct_hashmap_getp(hm, key, key_size, &src, &rvalue_size));
 
 	if (*value_size == 0) *value_size = rvalue_size;
 	if (value != NULL) memcpy(value, src, *value_size);
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_hashmap_getp(qstruct_hashmap_t hashmap, void *key, size_t key_size, void **value, size_t *value_size) {
-	struct hashmap *hm =  hashmap;
+qstruct_result_t qstruct_hashmap_getp(qstruct_hashmap_t hm, void *key, size_t key_size, void **value, size_t *value_size) {
 	struct entry *e;
 	qstruct_run(_hm_get(hm, &e, key, key_size));
 	*value = e->value;
@@ -207,14 +203,12 @@ qstruct_result_t qstruct_hashmap_getp(qstruct_hashmap_t hashmap, void *key, size
 	return QSTRUCT_RESULT_OK;
 }
 
-bool qstruct_hashmap_has(qstruct_hashmap_t hashmap, void *key, size_t key_size) {
-	struct hashmap *hm = hashmap;
+bool qstruct_hashmap_has(qstruct_hashmap_t hm, void *key, size_t key_size) {
 	struct entry *e;
 	return _hm_get(hm, &e, key, key_size) == QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_hashmap_remove(qstruct_hashmap_t hashmap, void *key, size_t key_size) {
-	struct hashmap *hm =  hashmap;
+qstruct_result_t qstruct_hashmap_remove(qstruct_hashmap_t hm, void *key, size_t key_size) {
 	struct entry *e;
 	qstruct_run(_hm_get(hm, &e, key, key_size));
 	long bucket_index = HM_BUCKET_INDEX(key, key_size, hm);
@@ -229,12 +223,11 @@ qstruct_result_t qstruct_hashmap_remove(qstruct_hashmap_t hashmap, void *key, si
 	return QSTRUCT_RESULT_OK;
 }
 
-size_t qstruct_hashmap_length(qstruct_hashmap_t hashmap) {
-	return ((struct hashmap *) hashmap)->length;
+size_t qstruct_hashmap_length(qstruct_hashmap_t hm) {
+	return hm->length;
 }
 
-qstruct_result_t qstruct_hashmap_iterator_create(qstruct_hashmap_t tree, qstruct_hashmap_iterator_t *iterator) {
-	struct hashmap *hm = tree;
+qstruct_result_t qstruct_hashmap_iterator_create(qstruct_hashmap_t hm, qstruct_hashmap_iterator_t *iterator) {
 	struct iterator *it = malloc(sizeof(struct iterator) + sizeof(struct entry*) * hm->length);
 	it->map = hm;
 	it->size = 0;
