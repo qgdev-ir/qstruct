@@ -1,6 +1,6 @@
 #include <qstruct/qstruct.internal.h>
 
-struct arraylist {
+struct qstruct_arraylist {
 	size_t value_size;	// Size of each value
 	size_t capacity;	// How much value fits in current array
 	size_t length;		// How much is current array filled
@@ -20,7 +20,7 @@ inline static void _ensure_capacity(qstruct_arraylist_t al) {
 
 qstruct_result_t qstruct_arraylist_create(qstruct_arraylist_t *arraylist, size_t value_size, size_t initialize_capacity) {
 	if (initialize_capacity == 0) initialize_capacity = QSTRUCT_ARRAYLIST_DEFAULT_INITIALIZE_CAPACITY;
-	qstruct_arraylist_t al = malloc(sizeof(struct arraylist));
+	qstruct_arraylist_t al = malloc(sizeof(struct qstruct_arraylist));
 	al->value_size = value_size;
 	al->capacity = initialize_capacity;
 	al->array = malloc(initialize_capacity * value_size);
