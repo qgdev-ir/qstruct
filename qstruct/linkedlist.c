@@ -1,6 +1,6 @@
 #include <qstruct/qstruct.internal.h>
 
-struct linkedlist {
+struct qstruct_linkedlist {
 	size_t length;		// length size
 	struct entry *entry;	// pointer to first entry
 	struct entry *lentry;	// pointer to last entry
@@ -41,7 +41,7 @@ static inline qstruct_result_t _ll_getp(qstruct_linkedlist_t ll, struct entry **
 }
 
 qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list) {
-	qstruct_linkedlist_t ll = malloc(sizeof(struct linkedlist));
+	qstruct_linkedlist_t ll = malloc(sizeof(struct qstruct_linkedlist));
 	ll->length = 0;
 	ll->entry = NULL;
 	ll->lentry = NULL;
