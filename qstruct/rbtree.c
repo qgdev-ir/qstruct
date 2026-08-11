@@ -428,7 +428,7 @@ size_t qstruct_rbtree_length(qstruct_rbtree_t tree) {
  * Add node and all of its children to iterator
  * (make sure iterator has enough capacity)
  */
-static inline void _rbt_iter_add_node(struct iterator *it, struct node *n) {
+static inline void _rbt_iter_add_node(qstruct_rbtree_iterator_t it, struct node *n) {
 	if (n == NULL) return;
 	it->nodes[it->size++] = n;
 	_rbt_iter_add_node(it, n->left);
@@ -436,7 +436,7 @@ static inline void _rbt_iter_add_node(struct iterator *it, struct node *n) {
 }
 
 qstruct_result_t qstruct_rbtree_iterator_create(qstruct_rbtree_t t, qstruct_rbtree_iterator_t *iterator) {
-	struct iterator *it = malloc(sizeof(struct iterator) + sizeof(struct node*) * t->length);
+	qstruct_rbtree_iterator_t it = malloc(sizeof(struct iterator) + sizeof(struct node*) * t->length);
 	it->tree = t;
 	it->size = 0;
 	it->index = -1;
@@ -445,35 +445,31 @@ qstruct_result_t qstruct_rbtree_iterator_create(qstruct_rbtree_t t, qstruct_rbtr
 	return QSTRUCT_RESULT_OK;
 }
 
-bool qstruct_rbtree_iterator_next(qstruct_rbtree_iterator_t iterator) {
-	struct iterator *it = iterator;
+bool qstruct_rbtree_iterator_next(qstruct_rbtree_iterator_t it) {
 	if (it->index + 1 >= it->size) return false;
 	it->index++;
 	return true;
 }
 
-size_t qstruct_rbtree_iterator_current_size(qstruct_rbtree_iterator_t iterator) {
-	struct iterator *it = iterator;
+size_t qstruct_rbtree_iterator_current_size(qstruct_rbtree_iterator_t it) {
 	struct node *node = it->nodes[it->index];
 	return node->value_size;
 }
 
-qstruct_result_t qstruct_rbtree_iterator_current_value(qstruct_rbtree_iterator_t iterator, void *buffer) {
-	struct iterator *it = iterator;
+qstruct_result_t qstruct_rbtree_iterator_current_value(qstruct_rbtree_iterator_t it, void *buffer) {
 	struct node *node = it->nodes[it->index];
 	memcpy(buffer, node->value, node->value_size);
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_rbtree_iterator_current_valuep(qstruct_rbtree_iterator_t iterator, void **buffer) {
-	struct iterator *it = iterator;
+qstruct_result_t qstruct_rbtree_iterator_current_valuep(qstruct_rbtree_iterator_t it, void **buffer) {
 	struct node *node = it->nodes[it->index];
 	*buffer = node->value;
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_rbtree_iterator_destroy(qstruct_rbtree_iterator_t iterator) {
-	free(iterator);
+qstruct_result_t qstruct_rbtree_iterator_destroy(qstruct_rbtree_iterator_t it) {
+	free(it);
 	return QSTRUCT_RESULT_OK;
 }
 
