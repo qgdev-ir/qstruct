@@ -5,7 +5,7 @@
  */
 #define HM_BUCKET_INDEX(k, ks, hm) (hm->hasher(k, ks, hm->seed) & (hm->capacity - 1 ))
 
-struct hashmap {
+struct qstruct_hashmap {
 	size_t length;			// How much is current array filled
 	qstruct_rbtree_t *buckets;	// Buckets
 	size_t capacity;		// Capacity of buckets
@@ -127,7 +127,7 @@ qstruct_result_t qstruct_hashmap_create(qstruct_hashmap_t *hashmap, qstruct_rbtr
 	if (capacity == 0) capacity = QSTRUCT_HASHMAP_DEFAULT_CAPACITY;
 	if (max_loadfactor == 0) max_loadfactor = QSTRUCT_HASHMAP_DEFAULT_MAX_LOADFACTOR;
 
-	qstruct_hashmap_t hm = malloc(sizeof(struct hashmap));
+	qstruct_hashmap_t hm = malloc(sizeof(struct qstruct_hashmap));
 	hm->length = 0;
 	hm->capacity = capacity;
 	hm->comparator = comparator;
