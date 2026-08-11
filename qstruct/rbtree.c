@@ -19,7 +19,7 @@ struct node {
 };
 
 struct iterator {
-	struct rbtree *tree;
+	qstruct_rbtree_t tree;
 	size_t size;
 	int index;
 	struct node *nodes[];
@@ -28,7 +28,7 @@ struct iterator {
 /*
  * Performes a right rotate
  */
-static inline void _rbt_right_rotate(struct rbtree *t, struct node *n) {
+static inline void _rbt_right_rotate(qstruct_rbtree_t t, struct node *n) {
 	struct node *l = n->left;
 
 	n->left = l->right;
@@ -52,7 +52,7 @@ static inline void _rbt_right_rotate(struct rbtree *t, struct node *n) {
 /*
  * Performes a left rotate
  */
-static inline void _rbt_left_rotate(struct rbtree *t, struct node *n) {
+static inline void _rbt_left_rotate(qstruct_rbtree_t t, struct node *n) {
 	struct node *l = n->right;
 
 	n->right = l->left;
@@ -76,7 +76,7 @@ static inline void _rbt_left_rotate(struct rbtree *t, struct node *n) {
 /*
  * Fix tree after add action
  */
-static inline void _rbt_fix_add(struct rbtree *t, struct node *n) {
+static inline void _rbt_fix_add(qstruct_rbtree_t t, struct node *n) {
 	while (IS_RED(n->parent)) {
 		struct node *p = n->parent;
 		struct node *g = p->parent;
@@ -127,7 +127,7 @@ _rbt_fix_add_recolor:
  * Finds a node and return a pointer to it
  * Returns NULL if node not found
  */
-struct node *_rbt_find_node(struct rbtree *t, void *value) {
+struct node *_rbt_find_node(qstruct_rbtree_t t, void *value) {
 	qstruct_rbtree_comparator_t comparator = t->comparator;
 	struct node *n = t->root;
 	while (n != NULL) {
@@ -140,7 +140,7 @@ struct node *_rbt_find_node(struct rbtree *t, void *value) {
 }
 
 qstruct_result_t qstruct_rbtree_create(qstruct_rbtree_t *tree, qstruct_rbtree_comparator_t comparator) {
-	struct rbtree *t = malloc(sizeof(struct rbtree));
+	qstruct_rbtree_t t = malloc(sizeof(struct rbtree));
 	t->comparator = comparator;
 	t->root = NULL;
 	t->length = 0;
@@ -148,8 +148,7 @@ qstruct_result_t qstruct_rbtree_create(qstruct_rbtree_t *tree, qstruct_rbtree_co
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_rbtree_add(qstruct_rbtree_t tree, void *value, size_t value_size) {
-	struct rbtree *t = tree;
+qstruct_result_t qstruct_rbtree_add(qstruct_rbtree_t t, void *value, size_t value_size) {
 	qstruct_rbtree_comparator_t comparator = t->comparator;
 
 	struct node *current = t->root;
@@ -190,17 +189,16 @@ qstruct_result_t qstruct_rbtree_add(qstruct_rbtree_t tree, void *value, size_t v
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_rbtree_get(qstruct_rbtree_t tree, void *value, size_t *value_size) {
+qstruct_result_t qstruct_rbtree_get(qstruct_rbtree_t t, void *value, size_t *value_size) {
 	void *src = value;
 	size_t fetched_value_size;
-	qstruct_run(qstruct_rbtree_getp(tree, &value, &fetched_value_size));
+	qstruct_run(qstruct_rbtree_getp(t, &value, &fetched_value_size));
 	if (*value_size == 0) *value_size = fetched_value_size;
 	if (value != NULL) memcpy(value, src, *value_size);
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_rbtree_getp(qstruct_rbtree_t tree, void **value, size_t *value_size) {
-	struct rbtree *t = tree;
+qstruct_result_t qstruct_rbtree_getp(qstruct_rbtree_t t, void **value, size_t *value_size) {
 	struct node *n = _rbt_find_node(t, *value);
 	if (n == NULL) return QSTRUCT_RESULT_VALUE_NOT_FOUND;
 	*value_size = n->value_size;
@@ -209,7 +207,7 @@ qstruct_result_t qstruct_rbtree_getp(qstruct_rbtree_t tree, void **value, size_t
 }
 
 bool qstruct_rbtree_has(qstruct_rbtree_t tree, void *value) {
-	struct rbtree *t = tree;
+	qstruct_rbtree_t t = tree;
 	return _rbt_find_node(t, value) != NULL;
 }
 
@@ -228,7 +226,7 @@ inline static struct node* _rbt_get_successor(struct node *n) {
 /*
  * Fixes double black after removal
  */
-static inline void _rbt_fix_double_black(struct rbtree *t, struct node *n) {
+static inline void _rbt_fix_double_black(qstruct_rbtree_t t, struct node *n) {
 	if (n == t->root) return;
 	struct node *p = n->parent;
 	struct node *s = n == p->left ? p->right : p->left;
@@ -348,7 +346,7 @@ static inline struct node* _rbt_set_value(struct node *v, struct node *u) {
 /*
  * Removes given node from the tree
  */
-static inline void _rbt_remove_node(struct rbtree *t, struct node *v) {
+static inline void _rbt_remove_node(qstruct_rbtree_t t, struct node *v) {
 	struct node *u = _rbt_get_successor(v);
 	bool uv_black = !IS_RED(u) && !IS_RED(v);
 	struct node *p = v->parent;
@@ -397,8 +395,7 @@ static inline void _rbt_remove_node(struct rbtree *t, struct node *v) {
 	_rbt_remove_node(t, u);
 }
 
-qstruct_result_t qstruct_rbtree_remove(qstruct_rbtree_t tree, void *value) {
-	struct rbtree *t = tree;
+qstruct_result_t qstruct_rbtree_remove(qstruct_rbtree_t t, void *value) {
 	struct node *n = _rbt_find_node(t, value);
 	if (n == NULL) return QSTRUCT_RESULT_VALUE_NOT_FOUND;
 	_rbt_remove_node(t, n);
@@ -416,15 +413,14 @@ static inline void _rbt_destroy(struct node *n) {
 	free(n);
 }
 
-qstruct_result_t qstruct_rbtree_destroy(qstruct_rbtree_t tree) {
-	struct rbtree *t = tree;
+qstruct_result_t qstruct_rbtree_destroy(qstruct_rbtree_t t) {
 	_rbt_destroy(t->root);
 	free(t);
 	return QSTRUCT_RESULT_OK;
 }
 
 size_t qstruct_rbtree_length(qstruct_rbtree_t tree) {
-	struct rbtree *t = tree;
+	qstruct_rbtree_t t = tree;
 	return t->length;
 }
 
@@ -439,8 +435,7 @@ static inline void _rbt_iter_add_node(struct iterator *it, struct node *n) {
 	_rbt_iter_add_node(it, n->right);
 }
 
-qstruct_result_t qstruct_rbtree_iterator_create(qstruct_rbtree_t tree, qstruct_rbtree_iterator_t *iterator) {
-	struct rbtree *t = tree;
+qstruct_result_t qstruct_rbtree_iterator_create(qstruct_rbtree_t t, qstruct_rbtree_iterator_t *iterator) {
 	struct iterator *it = malloc(sizeof(struct iterator) + sizeof(struct node*) * t->length);
 	it->tree = t;
 	it->size = 0;

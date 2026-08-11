@@ -10,7 +10,7 @@ extern "C" {
  * and the comparator will compare a specific field in the struct
  * but non-struct types like integers can also be used as value
  */
-typedef void* qstruct_rbtree_t;
+typedef struct rbtree* qstruct_rbtree_t;
 
 /*
  * An iterator for the tree
