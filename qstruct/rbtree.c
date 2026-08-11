@@ -18,7 +18,7 @@ struct node {
 	char value[];
 };
 
-struct iterator {
+struct qstruct_rbtree_iterator {
 	qstruct_rbtree_t tree;
 	size_t size;
 	int index;
@@ -436,7 +436,7 @@ static inline void _rbt_iter_add_node(qstruct_rbtree_iterator_t it, struct node 
 }
 
 qstruct_result_t qstruct_rbtree_iterator_create(qstruct_rbtree_t t, qstruct_rbtree_iterator_t *iterator) {
-	qstruct_rbtree_iterator_t it = malloc(sizeof(struct iterator) + sizeof(struct node*) * t->length);
+	qstruct_rbtree_iterator_t it = malloc(sizeof(struct qstruct_rbtree_iterator) + sizeof(struct node*) * t->length);
 	it->tree = t;
 	it->size = 0;
 	it->index = -1;

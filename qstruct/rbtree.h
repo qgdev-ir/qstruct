@@ -15,7 +15,7 @@ typedef struct qstruct_rbtree* qstruct_rbtree_t;
 /*
  * An iterator for the tree
  */
-typedef struct iterator* qstruct_rbtree_iterator_t;
+typedef struct qstruct_rbtree_iterator* qstruct_rbtree_iterator_t;
 
 /*
  * Compares to values and returns a number as result:
