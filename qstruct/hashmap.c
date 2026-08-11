@@ -81,7 +81,7 @@ static inline qstruct_result_t _hm_ensure_loadfactor(qstruct_hashmap_t hm) {
 
 		qstruct_rbtree_iterator_t it;
 		for (int i = 0; i < ocapacity; i++) {
-			qstruct_rbtree_t *ob = obuckets[i];
+			qstruct_rbtree_t ob = obuckets[i];
 			if (ob != NULL) {
 				qstruct_run(qstruct_rbtree_iterator_create(ob, &it));
 				while (qstruct_rbtree_iterator_next(it)) {
@@ -146,7 +146,7 @@ qstruct_result_t qstruct_hashmap_destroy(qstruct_hashmap_t hm) {
 	qstruct_rbtree_t *buckets = hm->buckets;
 
 	for (int i = 0; i < hm->capacity; i++) {
-		qstruct_rbtree_t *bucket = buckets[i];
+		qstruct_rbtree_t bucket = buckets[i];
 		if (bucket != NULL) {
 			qstruct_rbtree_iterator_t it;
 			qstruct_run(qstruct_rbtree_iterator_create(bucket, &it));
