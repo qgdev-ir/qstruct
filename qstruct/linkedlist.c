@@ -2,7 +2,6 @@
 
 struct linkedlist {
 	size_t length;		// length size
-	size_t value_size;	// size of each value
 	struct entry *entry;	// pointer to first entry
 	struct entry *lentry;	// pointer to last entry
 };
@@ -10,6 +9,7 @@ struct linkedlist {
 struct entry {
 	struct entry *previous;	// Previous entry
 	struct entry *next;	// Next entry
+	size_t value_size;	// Size of the value
 	uint8_t value[];	// Value of entry
 };
 
@@ -40,19 +40,18 @@ static inline qstruct_result_t _ll_getp(struct linkedlist *ll, struct entry **en
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list, size_t value_size) {
+qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list) {
 	struct linkedlist *ll = malloc(sizeof(struct linkedlist));
 	ll->length = 0;
-	ll->value_size = value_size;
 	ll->entry = NULL;
 	ll->lentry = NULL;
 	*list = ll;
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t list, void *value) {
+qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t list, void *value, size_t value_size) {
 	struct linkedlist *ll = list;
-	struct entry *new_entry = malloc(sizeof(struct entry) + ll->value_size);
+	struct entry *new_entry = malloc(sizeof(struct entry) + value_size);
 	if (ll->length == 0) {
 		new_entry->previous = NULL;
 		new_entry->next = NULL;
@@ -63,23 +62,26 @@ qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t list, void *value) 
 		ll->lentry->next = new_entry;
 	}
 	ll->lentry = new_entry;
-	memcpy(new_entry->value, value, ll->value_size);
+	new_entry->value_size = value_size;
+	memcpy(new_entry->value, value, value_size);
 	ll->length++;
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_getp(qstruct_linkedlist_t list, size_t index, void **value) {
+qstruct_result_t qstruct_linkedlist_getp(qstruct_linkedlist_t list, size_t index, void **value, size_t *value_size) {
 	struct entry *entry;
 	qstruct_run(_ll_getp(list, &entry, index));
 	*value = entry->value;
+	*value_size = entry->value_size;
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_get(qstruct_linkedlist_t list, size_t index, void *value) {
+qstruct_result_t qstruct_linkedlist_get(qstruct_linkedlist_t list, size_t index, void *value, size_t *value_size) {
 	struct linkedlist *ll = list;
-	void *src;
-	qstruct_run(qstruct_linkedlist_getp(list, index, &src));
-	memcpy(value, src, ll->value_size);
+	struct entry *e;
+	qstruct_run(_ll_getp(list, &e, index));
+	if (*value_size == 0) *value_size = e->value_size;
+	if (value != NULL) memcpy(value, e->value, *value_size);
 	return QSTRUCT_RESULT_OK;
 }
 
@@ -132,21 +134,39 @@ qstruct_result_t qstruct_linkedlist_clear(qstruct_linkedlist_t list) {
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_replace(qstruct_linkedlist_t list, size_t index, void *value) {
+qstruct_result_t qstruct_linkedlist_replace(qstruct_linkedlist_t list, size_t index, void *value, size_t value_size) {
 	struct linkedlist *ll = list;
 	struct entry *entry;
 	qstruct_run(_ll_getp(ll, &entry, index));
-	memcpy(entry->value, value, ll->value_size);
+	if (entry->value_size != value_size) {
+		struct entry *old_entry = entry;
+		entry = realloc(entry, sizeof(struct entry) + value_size);
+		if (old_entry != entry) {
+			if (entry->previous != NULL) {
+				entry->previous->next = entry;
+			} else {
+				ll->entry = entry;
+			}
+			if (entry->next != NULL) {
+				entry->next->previous = entry;
+			} else {
+				ll->lentry = entry;
+			}
+		}
+	}
+	entry->value_size = value_size;
+	memcpy(entry->value, value, value_size);
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_insert(qstruct_linkedlist_t list, size_t index, void *value) {
+qstruct_result_t qstruct_linkedlist_insert(qstruct_linkedlist_t list, size_t index, void *value, size_t value_size) {
 	struct linkedlist *ll = list;
 	struct entry *entry;
 	qstruct_run(_ll_getp(ll, &entry, index));
 	struct entry *previous_entry = entry->previous;
-	struct entry *new_entry = malloc(sizeof(struct entry) + ll->value_size);
-	memcpy(new_entry->value, value, ll->value_size);
+	struct entry *new_entry = malloc(sizeof(struct entry) + value_size);
+	new_entry->value_size = value_size;
+	memcpy(new_entry->value, value, value_size);
 	previous_entry->next = new_entry;
 	new_entry->next = entry;
 	entry->previous = new_entry;
