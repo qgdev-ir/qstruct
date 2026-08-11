@@ -9,7 +9,7 @@ extern "C" {
 /*
  * A pointer to actual arraylist
  */
-typedef void* qstruct_arraylist_t;
+typedef struct arraylist* qstruct_arraylist_t;
 
 /*
  * Creates an arraylist
