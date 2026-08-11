@@ -16,7 +16,7 @@ extern "C" {
 /*
  * A pointer to actual hashmap
  */
-typedef void* qstruct_hashmap_t;
+typedef struct qstruct_hashmap* qstruct_hashmap_t;
 
 /*
  * An iterator for the map
