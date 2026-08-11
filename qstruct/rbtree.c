@@ -3,7 +3,7 @@
 
 #define IS_RED(n) (n != NULL && n->red)
 
-struct rbtree {
+struct qstruct_rbtree {
 	qstruct_rbtree_comparator_t comparator;
 	struct node *root;
 	size_t length;
@@ -140,7 +140,7 @@ struct node *_rbt_find_node(qstruct_rbtree_t t, void *value) {
 }
 
 qstruct_result_t qstruct_rbtree_create(qstruct_rbtree_t *tree, qstruct_rbtree_comparator_t comparator) {
-	qstruct_rbtree_t t = malloc(sizeof(struct rbtree));
+	qstruct_rbtree_t t = malloc(sizeof(struct qstruct_rbtree));
 	t->comparator = comparator;
 	t->root = NULL;
 	t->length = 0;
