@@ -1,6 +1,6 @@
 #include <qstruct/qstruct.internal.h>
 
-struct linkedlist {
+struct qstruct_linkedlist {
 	size_t length;		// length size
 	struct entry *entry;	// pointer to first entry
 	struct entry *lentry;	// pointer to last entry
@@ -16,7 +16,7 @@ struct entry {
 /*
  * Gets pointer of entry at given index
  */
-static inline qstruct_result_t _ll_getp(struct linkedlist *ll, struct entry **entry, size_t index) {
+static inline qstruct_result_t _ll_getp(qstruct_linkedlist_t ll, struct entry **entry, size_t index) {
 	size_t length = ll->length;
 	if (length <= index) return QSTRUCT_RESULT_INDEX_OUTOF_BOUND;
 	int i;
@@ -41,7 +41,7 @@ static inline qstruct_result_t _ll_getp(struct linkedlist *ll, struct entry **en
 }
 
 qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list) {
-	struct linkedlist *ll = malloc(sizeof(struct linkedlist));
+	qstruct_linkedlist_t ll = malloc(sizeof(struct qstruct_linkedlist));
 	ll->length = 0;
 	ll->entry = NULL;
 	ll->lentry = NULL;
@@ -49,8 +49,7 @@ qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list) {
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t list, void *value, size_t value_size) {
-	struct linkedlist *ll = list;
+qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t ll, void *value, size_t value_size) {
 	struct entry *new_entry = malloc(sizeof(struct entry) + value_size);
 	if (ll->length == 0) {
 		new_entry->previous = NULL;
@@ -68,37 +67,33 @@ qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t list, void *value, 
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_getp(qstruct_linkedlist_t list, size_t index, void **value, size_t *value_size) {
+qstruct_result_t qstruct_linkedlist_getp(qstruct_linkedlist_t ll, size_t index, void **value, size_t *value_size) {
 	struct entry *entry;
-	qstruct_run(_ll_getp(list, &entry, index));
+	qstruct_run(_ll_getp(ll, &entry, index));
 	*value = entry->value;
 	*value_size = entry->value_size;
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_get(qstruct_linkedlist_t list, size_t index, void *value, size_t *value_size) {
-	struct linkedlist *ll = list;
+qstruct_result_t qstruct_linkedlist_get(qstruct_linkedlist_t ll, size_t index, void *value, size_t *value_size) {
 	struct entry *e;
-	qstruct_run(_ll_getp(list, &e, index));
+	qstruct_run(_ll_getp(ll, &e, index));
 	if (*value_size == 0) *value_size = e->value_size;
 	if (value != NULL) memcpy(value, e->value, *value_size);
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_destroy(qstruct_linkedlist_t list) {
-	struct linkedlist *ll = list;
-	qstruct_run(qstruct_linkedlist_clear(list));
+qstruct_result_t qstruct_linkedlist_destroy(qstruct_linkedlist_t ll) {
+	qstruct_run(qstruct_linkedlist_clear(ll));
 	free(ll);
 	return QSTRUCT_RESULT_OK;
 }
 
-size_t qstruct_linkedlist_length(qstruct_linkedlist_t list) {
-	struct linkedlist *ll = list;
+size_t qstruct_linkedlist_length(qstruct_linkedlist_t ll) {
 	return ll->length;
 }
 
-qstruct_result_t qstruct_linkedlist_remove(qstruct_linkedlist_t list, size_t index) {
-	struct linkedlist *ll = list;
+qstruct_result_t qstruct_linkedlist_remove(qstruct_linkedlist_t ll, size_t index) {
 	struct entry *entry;
 	qstruct_run(_ll_getp(ll, &entry, index));
 	struct entry *previous = entry->previous;
@@ -120,8 +115,7 @@ qstruct_result_t qstruct_linkedlist_remove(qstruct_linkedlist_t list, size_t ind
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_clear(qstruct_linkedlist_t list) {
-	struct linkedlist *ll = list;
+qstruct_result_t qstruct_linkedlist_clear(qstruct_linkedlist_t ll) {
 	struct entry *entry = ll->entry;
 	while (entry != NULL) {
 		struct entry *next_entry = entry->next;
@@ -134,8 +128,7 @@ qstruct_result_t qstruct_linkedlist_clear(qstruct_linkedlist_t list) {
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_replace(qstruct_linkedlist_t list, size_t index, void *value, size_t value_size) {
-	struct linkedlist *ll = list;
+qstruct_result_t qstruct_linkedlist_replace(qstruct_linkedlist_t ll, size_t index, void *value, size_t value_size) {
 	struct entry *entry;
 	qstruct_run(_ll_getp(ll, &entry, index));
 	if (entry->value_size != value_size) {
@@ -159,8 +152,7 @@ qstruct_result_t qstruct_linkedlist_replace(qstruct_linkedlist_t list, size_t in
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_result_t qstruct_linkedlist_insert(qstruct_linkedlist_t list, size_t index, void *value, size_t value_size) {
-	struct linkedlist *ll = list;
+qstruct_result_t qstruct_linkedlist_insert(qstruct_linkedlist_t ll, size_t index, void *value, size_t value_size) {
 	struct entry *entry;
 	qstruct_run(_ll_getp(ll, &entry, index));
 	struct entry *previous_entry = entry->previous;
