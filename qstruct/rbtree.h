@@ -48,6 +48,7 @@ qstruct_result_t qstruct_rbtree_get(qstruct_rbtree_t tree, void *value, size_t *
 /*
  * Gets pointer to value in tree
  * value must contains pointer to a value that contains least value for comparator to find actual value
+ * value_size is ignored if its NULL
  * NOTICE: Please dont change anything that will effect comparator result
  * WARNING: changes in tree may break the pointer (removing the value)
  * Time complexity: O(log n)
