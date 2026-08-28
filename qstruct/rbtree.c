@@ -201,7 +201,7 @@ qstruct_result_t qstruct_rbtree_get(qstruct_rbtree_t t, void *value, size_t *val
 qstruct_result_t qstruct_rbtree_getp(qstruct_rbtree_t t, void **value, size_t *value_size) {
 	struct node *n = _rbt_find_node(t, *value);
 	if (n == NULL) return QSTRUCT_RESULT_VALUE_NOT_FOUND;
-	*value_size = n->value_size;
+	if (value_size) *value_size = n->value_size;
 	*value = n->value;
 	return QSTRUCT_RESULT_OK;
 }
