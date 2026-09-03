@@ -74,6 +74,13 @@ qstruct_arraylist_t qstruct_arraylist_destroy(qstruct_arraylist_t arraylist);
  */
 void* qstruct_arraylist_array(qstruct_arraylist_t al);
 
+/*
+ * Destroys the qstruct arraylist metadata
+ * Resize the array of arraylist to length of it
+ * Returns the array
+ */
+void* qstruct_arraylist_convert_array(qstruct_arraylist_t al, size_t *size);
+
 #ifdef __cplusplus
 }
 #endif
