@@ -79,3 +79,7 @@ qstruct_arraylist_t qstruct_arraylist_insert(qstruct_arraylist_t al, void *value
 	return QSTRUCT_RESULT_OK;
 }
 
+void* qstruct_arraylist_array(qstruct_arraylist_t al) {
+	return al->array;
+}
+

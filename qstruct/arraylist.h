@@ -69,6 +69,11 @@ qstruct_arraylist_t qstruct_arraylist_clear(qstruct_arraylist_t arraylist);
  */
 qstruct_arraylist_t qstruct_arraylist_destroy(qstruct_arraylist_t arraylist);
 
+/*
+ * Returns the array
+ */
+void* qstruct_arraylist_array(qstruct_arraylist_t al);
+
 #ifdef __cplusplus
 }
 #endif
