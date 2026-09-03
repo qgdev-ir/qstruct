@@ -126,6 +126,27 @@ bool test_qstruct_arraylist_insert() {
 	return success;
 }
 
+bool test_qstruct_arraylist_convert_array() {
+	test_run_log("qstruct_arraylist_convert_array");
+
+	qstruct_arraylist_t list;
+	int value = 858585;
+	int value2 = 696969;
+	int *arr;
+	size_t arr_size;
+
+	bool success = 1;
+	success &= qstruct_arraylist_create(&list, sizeof(int), 1) == QSTRUCT_RESULT_OK;
+	success &= qstruct_arraylist_add(list, &value) == QSTRUCT_RESULT_OK;
+	success &= qstruct_arraylist_add(list, &value2) == QSTRUCT_RESULT_OK;
+	arr = qstruct_arraylist_convert_array(list, &arr_size);
+	success &= arr_size == 2;
+	success &= arr[0] == value;
+	success &= arr[1] == value2;
+	test_result_log(success);
+	return success;
+}
+
 bool test_qstruct_arraylist() {
 	bool success = 1;
 	success &= test_qstruct_arraylist_add_get();
@@ -134,5 +155,6 @@ bool test_qstruct_arraylist() {
 	success &= test_qstruct_arraylist_clear();
 	success &= test_qstruct_arraylist_set();
 	success &= test_qstruct_arraylist_insert();
+	success &= test_qstruct_arraylist_convert_array();
 	return success;
 }
