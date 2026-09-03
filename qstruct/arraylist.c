@@ -83,3 +83,13 @@ void* qstruct_arraylist_array(qstruct_arraylist_t al) {
 	return al->array;
 }
 
+void* qstruct_arraylist_convert_array(qstruct_arraylist_t al, size_t *size) {
+	void *arr = al->array;
+	if (al->length != al->capacity) {
+		arr = realloc(arr, al->length);
+	}
+	*size = al->length;
+	free(al);
+	return arr;
+}
+
