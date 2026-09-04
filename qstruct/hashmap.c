@@ -199,7 +199,7 @@ qstruct_result_t qstruct_hashmap_getp(qstruct_hashmap_t hm, void *key, size_t ke
 	struct entry *e;
 	qstruct_run(_hm_get(hm, &e, key, key_size));
 	*value = e->value;
-	*value_size = e->value_size;
+	if (value_size) *value_size = e->value_size;
 	return QSTRUCT_RESULT_OK;
 }
 
