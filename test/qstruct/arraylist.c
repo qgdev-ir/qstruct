@@ -143,6 +143,7 @@ bool test_qstruct_arraylist_convert_array() {
 	success &= arr_size == 2;
 	success &= arr[0] == value;
 	success &= arr[1] == value2;
+	free(arr);
 	test_result_log(success);
 	return success;
 }
