@@ -7,3 +7,9 @@ const static char *qstruct_result_strings[] = {
 	"KEY_NOT_FOUND",
 };
 
+const char *qstruct_result_string(qstruct_result_t res) {
+	if (res > (sizeof(qstruct_result_strings) / sizeof(qstruct_result_strings[0])))
+		return "UNKNOWN";
+	return qstruct_result_strings[res];
+}
+
