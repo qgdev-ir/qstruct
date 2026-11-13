@@ -140,7 +140,7 @@ struct node *_rbt_find_node(qstruct_rbtree_t t, const void *value) {
 }
 
 qstruct_result_t qstruct_rbtree_create(qstruct_rbtree_t *tree, qstruct_rbtree_comparator_t comparator) {
-	qstruct_rbtree_t t = malloc(sizeof(struct qstruct_rbtree));
+	qstruct_rbtree_t t; qmalloc(t, sizeof(struct qstruct_rbtree));
 	t->comparator = comparator;
 	t->root = NULL;
 	t->length = 0;
@@ -168,7 +168,7 @@ qstruct_result_t qstruct_rbtree_add(qstruct_rbtree_t t, const void *value, size_
 		}
 	}
 
-	struct node *new_node = malloc(sizeof(struct node) + value_size);
+	struct node *new_node; qmalloc(new_node, sizeof(struct node) + value_size);
 	new_node->red = true;
 	new_node->parent = parent;
 	new_node->left = NULL;
@@ -298,7 +298,7 @@ static inline void _rbt_replace_node_novalue(struct node *n, struct node *s) {
 /*
  * Swap values of given nodes
  */
-static inline void _rbt_swap_value(struct node **v, struct node **u) {
+static inline qstruct_result_t _rbt_swap_value(struct node **v, struct node **u) {
 	struct node* lv = *v;
 	struct node* lu = *u;
 	if (lv->value_size == lu->value_size) {
@@ -307,8 +307,8 @@ static inline void _rbt_swap_value(struct node **v, struct node **u) {
 		memcpy(lv->value, lu->value, lv->value_size);
 		memcpy(lu->value, temp, lu->value_size);
 	} else {
-		struct node* nv = malloc(sizeof(struct node) + lu->value_size);
-		struct node* nu = malloc(sizeof(struct node) + lv->value_size);
+		struct node* nv; qmalloc(nv, sizeof(struct node) + lu->value_size);
+		struct node* nu; qmalloc(nu, sizeof(struct node) + lv->value_size);
 		memcpy(nv->value, lu->value, nv->value_size);
 		memcpy(nu->value, lv->value, nu->value_size);
 		_rbt_replace_node_novalue(lv, nv);
@@ -318,12 +318,13 @@ static inline void _rbt_swap_value(struct node **v, struct node **u) {
 		*v = nv;
 		*u = nu;
 	}
+	return QSTRUCT_RESULT_OK;
 }
 
 /*
  * Removes given node from the tree
  */
-static inline void _rbt_remove_node(qstruct_rbtree_t t, struct node *v) {
+static inline qstruct_result_t _rbt_remove_node(qstruct_rbtree_t t, struct node *v) {
 	struct node *u = _rbt_get_successor(v);
 	bool uv_black = !IS_RED(u) && !IS_RED(v);
 	struct node *p = v->parent;
@@ -347,7 +348,7 @@ static inline void _rbt_remove_node(qstruct_rbtree_t t, struct node *v) {
 				p->left = NULL;
 		}
 		free(v);
-		return;
+		return QSTRUCT_RESULT_OK;
 	}
 
 	if (v->left == NULL || v->right == NULL) {
@@ -365,17 +366,18 @@ static inline void _rbt_remove_node(qstruct_rbtree_t t, struct node *v) {
 			if (uv_black) _rbt_fix_double_black(t, u);
 			else u->red = false;
 		}
-		return;
+		return QSTRUCT_RESULT_OK;
 	}
 
-	_rbt_swap_value(&v, &u);
-	_rbt_remove_node(t, u);
+	qstruct_run(_rbt_swap_value(&v, &u));
+	qstruct_run(_rbt_remove_node(t, u));
+	return QSTRUCT_RESULT_OK;
 }
 
 qstruct_result_t qstruct_rbtree_remove(qstruct_rbtree_t t, const void *value) {
 	struct node *n = _rbt_find_node(t, value);
 	if (n == NULL) return QSTRUCT_RESULT_VALUE_NOT_FOUND;
-	_rbt_remove_node(t, n);
+	qstruct_run(_rbt_remove_node(t, n));
 	t->length--;
 	return QSTRUCT_RESULT_OK;
 }
@@ -413,7 +415,7 @@ static inline void _rbt_iter_add_node(qstruct_rbtree_iterator_t it, struct node 
 }
 
 qstruct_result_t qstruct_rbtree_iterator_create(qstruct_rbtree_t t, qstruct_rbtree_iterator_t *iterator) {
-	qstruct_rbtree_iterator_t it = malloc(sizeof(struct qstruct_rbtree_iterator) + sizeof(struct node*) * t->length);
+	qstruct_rbtree_iterator_t it; qmalloc(it, sizeof(struct qstruct_rbtree_iterator) + sizeof(struct node*) * t->length);
 	it->tree = t;
 	it->size = 0;
 	it->index = -1;
