@@ -19,6 +19,10 @@ extern "C" {
 		if (res != QSTRUCT_RESULT_OK) return res; \
 	} while (0);
 
+#define qmalloc(var, size) do { \
+	var = malloc(size); \
+	if (!var) return QSTRUCT_RESULT_OUT_OF_MEMORY; \
+	} while(0);
 #ifdef __cplusplus
 }
 #endif
