@@ -296,19 +296,6 @@ static inline void _rbt_replace_node_novalue(struct node *n, struct node *s) {
 }
 
 /*
- * Resize node but doesnt copy value to new created node
- */
-static inline void _rbt_resize_node_novalue(struct node **n, size_t size) {
-	struct node *ln = *n;
-	if (ln->value_size == size) return;
-	struct node *nln = malloc(sizeof(struct node) + size);
-	_rbt_replace_node_novalue(ln, nln);
-	free(ln);
-	nln->value_size = size;
-	*n = ln;
-}
-
-/*
  * Swap values of given nodes
  */
 static inline void _rbt_swap_value(struct node **v, struct node **u) {
@@ -331,16 +318,6 @@ static inline void _rbt_swap_value(struct node **v, struct node **u) {
 		*v = nv;
 		*u = nu;
 	}
-}
-
-/*
- * Sets value of u to v
- * And returns new v
- */
-static inline struct node* _rbt_set_value(struct node *v, struct node *u) {
-	_rbt_resize_node_novalue(&v, u->value_size);
-	memcpy(v->value, u->value, v->value_size);
-	return v;
 }
 
 /*
