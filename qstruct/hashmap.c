@@ -75,7 +75,7 @@ static inline qstruct_result_t _hm_ensure_loadfactor(qstruct_hashmap_t hm) {
 		size_t ocapacity = hm->capacity;
 
 		size_t ncapacity = hm->capacity * 2;
-		qstruct_rbtree_t *buckets = calloc(ncapacity, sizeof(qstruct_rbtree_t));
+		qstruct_rbtree_t *buckets; qcalloc(buckets, ncapacity, sizeof(qstruct_rbtree_t));
 		hm->buckets = buckets;
 		hm->capacity = ncapacity;
 
@@ -107,7 +107,7 @@ static inline qstruct_result_t _hm_get(qstruct_hashmap_t hm, struct entry **e, c
 	qstruct_rbtree_t bucket = hm->buckets[HM_BUCKET_INDEX(key, key_size, hm)];
 	if (bucket == NULL) return QSTRUCT_RESULT_KEY_NOT_FOUND;
 
-	struct entry *tempe = malloc(sizeof(struct entry) + key_size);
+	struct entry *tempe; qmalloc(tempe, sizeof(struct entry) + key_size);
 	tempe->map = hm;
 	tempe->key_size = key_size;
 	memcpy(tempe->key, key, key_size);
@@ -127,7 +127,7 @@ qstruct_result_t qstruct_hashmap_create(qstruct_hashmap_t *hashmap, qstruct_rbtr
 	if (capacity == 0) capacity = QSTRUCT_HASHMAP_DEFAULT_CAPACITY;
 	if (max_loadfactor == 0) max_loadfactor = QSTRUCT_HASHMAP_DEFAULT_MAX_LOADFACTOR;
 
-	qstruct_hashmap_t hm = malloc(sizeof(struct qstruct_hashmap));
+	qstruct_hashmap_t hm; qmalloc(hm, sizeof(struct qstruct_hashmap));
 	hm->length = 0;
 	hm->capacity = capacity;
 	hm->comparator = comparator;
@@ -135,7 +135,7 @@ qstruct_result_t qstruct_hashmap_create(qstruct_hashmap_t *hashmap, qstruct_rbtr
 	hm->hasher = hasher;
 	hm->seed = seed;
 
-	qstruct_rbtree_t *buckets = calloc(capacity, sizeof(qstruct_rbtree_t));
+	qstruct_rbtree_t *buckets; qcalloc(buckets, capacity, sizeof(qstruct_rbtree_t));
 	hm->buckets = buckets;
 
 	*hashmap = hm;
@@ -168,8 +168,8 @@ qstruct_result_t qstruct_hashmap_destroy(qstruct_hashmap_t hm) {
 qstruct_result_t qstruct_hashmap_add(qstruct_hashmap_t hm, const void *key, size_t key_size, const void *value, size_t value_size) {
 	qstruct_run(_hm_ensure_loadfactor(hm));
 
-	struct entry *e = malloc(sizeof(struct entry) + key_size);
-	char *e_val = malloc(value_size);
+	struct entry *e; qmalloc(e, sizeof(struct entry) + key_size);
+	char *e_val; qmalloc(e_val, value_size);
 
 	e->map = hm;
 	e->value = e_val;
@@ -228,7 +228,7 @@ size_t qstruct_hashmap_length(qstruct_hashmap_t hm) {
 }
 
 qstruct_result_t qstruct_hashmap_iterator_create(qstruct_hashmap_t hm, qstruct_hashmap_iterator_t *iterator) {
-	struct iterator *it = malloc(sizeof(struct iterator) + sizeof(struct entry*) * hm->length);
+	struct iterator *it; qmalloc(it, sizeof(struct iterator) + sizeof(struct entry*) * hm->length);
 	it->map = hm;
 	it->size = 0;
 	it->index = -1;
