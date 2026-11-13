@@ -17,6 +17,7 @@ typedef enum {
 	QSTRUCT_RESULT_INDEX_OUTOF_BOUND = 1, // no value is stored in given index
 	QSTRUCT_RESULT_VALUE_NOT_FOUND = 2,	// requested value not found
 	QSTRUCT_RESULT_KEY_NOT_FOUND = 3,	// requested key not found
+	QSTRUCT_RESULT_OUT_OF_MEMORY = 4,	// no memory available to allocate
 } qstruct_result_t;
 
 /*
