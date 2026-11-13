@@ -23,6 +23,12 @@ extern "C" {
 	var = malloc(size); \
 	if (!var) return QSTRUCT_RESULT_OUT_OF_MEMORY; \
 	} while(0);
+#define qrealloc(var, ptr, size) do { \
+	var = realloc(ptr, size); \
+	if (!var) return QSTRUCT_RESULT_OUT_OF_MEMORY; \
+	} while(0);
+#define qrealloc2(var, size) qrealloc(var, var, size)
+
 #ifdef __cplusplus
 }
 #endif
