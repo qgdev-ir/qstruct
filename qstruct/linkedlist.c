@@ -41,7 +41,7 @@ static inline qstruct_result_t _ll_getp(qstruct_linkedlist_t ll, struct entry **
 }
 
 qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list) {
-	qstruct_linkedlist_t ll = malloc(sizeof(struct qstruct_linkedlist));
+	qstruct_linkedlist_t ll; qmalloc(ll, sizeof(struct qstruct_linkedlist));
 	ll->length = 0;
 	ll->entry = NULL;
 	ll->lentry = NULL;
@@ -50,7 +50,7 @@ qstruct_result_t qstruct_linkedlist_create(qstruct_linkedlist_t *list) {
 }
 
 qstruct_result_t qstruct_linkedlist_add(qstruct_linkedlist_t ll, const void *value, size_t value_size) {
-	struct entry *new_entry = malloc(sizeof(struct entry) + value_size);
+	struct entry *new_entry; qmalloc(new_entry, sizeof(struct entry) + value_size);
 	if (ll->length == 0) {
 		new_entry->previous = NULL;
 		new_entry->next = NULL;
@@ -133,7 +133,7 @@ qstruct_result_t qstruct_linkedlist_replace(qstruct_linkedlist_t ll, size_t inde
 	qstruct_run(_ll_getp(ll, &entry, index));
 	if (entry->value_size != value_size) {
 		struct entry *old_entry = entry;
-		entry = realloc(entry, sizeof(struct entry) + value_size);
+		qrealloc2(entry, sizeof(struct entry) + value_size);
 		if (old_entry != entry) {
 			if (entry->previous != NULL) {
 				entry->previous->next = entry;
@@ -156,7 +156,7 @@ qstruct_result_t qstruct_linkedlist_insert(qstruct_linkedlist_t ll, size_t index
 	struct entry *entry;
 	qstruct_run(_ll_getp(ll, &entry, index));
 	struct entry *previous_entry = entry->previous;
-	struct entry *new_entry = malloc(sizeof(struct entry) + value_size);
+	struct entry *new_entry; qmalloc(new_entry, sizeof(struct entry) + value_size);
 	new_entry->value_size = value_size;
 	memcpy(new_entry->value, value, value_size);
 	previous_entry->next = new_entry;

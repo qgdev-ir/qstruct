@@ -56,7 +56,7 @@ qstruct_result_t qstruct_arraylist_set(qstruct_arraylist_t arraylist, const void
  * Insert given value at given index
  * Time complexity: O(n)
  */
-qstruct_arraylist_t qstruct_arraylist_insert(qstruct_arraylist_t arraylist, const void *value, size_t index);
+qstruct_result_t qstruct_arraylist_insert(qstruct_arraylist_t arraylist, const void *value, size_t index);
 
 /*
  * Clear the arraylist

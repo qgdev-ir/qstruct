@@ -11,26 +11,27 @@ struct qstruct_arraylist {
  * Makes sure there is enough space for one more value
  * Extends the size of array if needed
  */
-inline static void _ensure_capacity(qstruct_arraylist_t al) {
+inline static qstruct_result_t _ensure_capacity(qstruct_arraylist_t al) {
 	if (al->capacity <= al->length) {
 		al->capacity *= 2;	// Doubles size of array
-		al->array = realloc(al->array, al->capacity * al->value_size);
+		qrealloc2(al->array, al->capacity * al->value_size);
 	}
+	return QSTRUCT_RESULT_OK;
 }
 
 qstruct_result_t qstruct_arraylist_create(qstruct_arraylist_t *arraylist, size_t value_size, size_t initialize_capacity) {
 	if (initialize_capacity == 0) initialize_capacity = QSTRUCT_ARRAYLIST_DEFAULT_INITIALIZE_CAPACITY;
-	qstruct_arraylist_t al = malloc(sizeof(struct qstruct_arraylist));
+	qstruct_arraylist_t al; qmalloc(al, sizeof(struct qstruct_arraylist));
 	al->value_size = value_size;
 	al->capacity = initialize_capacity;
-	al->array = malloc(initialize_capacity * value_size);
+	qmalloc(al->array, initialize_capacity * value_size);
 	al->length = 0;
 	*arraylist = al;
 	return QSTRUCT_RESULT_OK;
 }
 
 qstruct_result_t qstruct_arraylist_add(qstruct_arraylist_t al, const void *value) {
-	_ensure_capacity(al);
+	qstruct_run(_ensure_capacity(al));
 	void *dest = al->array + al->length++ * al ->value_size;
 	memcpy(dest, value, al->value_size);
 	return QSTRUCT_RESULT_OK;
@@ -71,8 +72,8 @@ qstruct_result_t qstruct_arraylist_set(qstruct_arraylist_t al, const void *value
 	return QSTRUCT_RESULT_OK;
 }
 
-qstruct_arraylist_t qstruct_arraylist_insert(qstruct_arraylist_t al, const void *value, size_t index) {
-	_ensure_capacity(al);
+qstruct_result_t qstruct_arraylist_insert(qstruct_arraylist_t al, const void *value, size_t index) {
+	qstruct_run(_ensure_capacity(al));
 	memmove(al->array + (index + 1) * al->value_size, al->array + index * al->value_size, (al->length - index) * al->value_size);
 	memcpy(al->array + index * al->value_size, value, al->value_size);
 	al->length++;
@@ -87,6 +88,7 @@ void* qstruct_arraylist_convert_array(qstruct_arraylist_t al, size_t *size) {
 	void *arr = al->array;
 	if (al->length != al->capacity) {
 		arr = realloc(arr, al->length);
+		if (!arr) return NULL;
 	}
 	*size = al->length;
 	free(al);
