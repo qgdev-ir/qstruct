@@ -28,6 +28,10 @@ extern "C" {
 	if (!var) return QSTRUCT_RESULT_OUT_OF_MEMORY; \
 	} while(0);
 #define qrealloc2(var, size) qrealloc(var, var, size)
+#define qcalloc(var, n, size) do { \
+	var = calloc(n, size); \
+	if (!var) return QSTRUCT_RESULT_OUT_OF_MEMORY; \
+	} while(0);
 
 #ifdef __cplusplus
 }
